@@ -77,7 +77,16 @@ jobs:
             texlive-xetex texlive-fonts-extra wget graphviz doxygen \
             check curl \
             gcovr \
-            check curl llvm llvm-dev
+      - name: Install LLVM/Clang Toolchain
+        run: |
+          sudo apt update -y
+          sudo apt install -y lsb-release wget software-properties-common gnupg
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/llvm-snapshot.gpg
+          echo "deb [signed-by=/usr/share/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main" | sudo tee /etc/apt/sources.list.d/llvm.list
+          sudo apt update -y
+          sudo apt install -y clang-21 clang-tools-21 llvm-21
+          sudo ln -sf /usr/bin/clang-21 /usr/bin/clang
+          sudo ln -sf /usr/bin/clang++-21 /usr/bin/clang++
 
       - name: Install PostgreSQL
         run: |
@@ -102,23 +111,28 @@ jobs:
 
       - name: Build Project
         run: |
-              mkdir build
-              cd build
-              if [ "${{ matrix.compiler }}" = "gcc" ]; then
-                export CC=/usr/bin/gcc
-              else
-                export CC=/usr/bin/clang
-                export CXX=/usr/bin/clang++
-              fi
-              
-              # Coverage flags for Clang + Debug
-              CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -Dcheck=ON"
-              if [ "${{ matrix.compiler }}" = "clang" ] && [ "${{ matrix.build_type }}" = "Debug" ]; then
-                 CMAKE_FLAGS="$CMAKE_FLAGS -DCMAKE_C_FLAGS='--coverage -fprofile-instr-generate -fcoverage-mapping'"
-              fi
-              
-              cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -Dcheck=ON ..
-              make -j$(nproc)
+          mkdir build
+          cd build
+
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then
+            export CC=/usr/bin/gcc
+            export CXX=/usr/bin/g++
+          else
+            export CC=/usr/bin/clang
+            export CXX=/usr/bin/clang++
+          fi
+
+          CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -Dcheck=ON"
+
+          if [ "${{ matrix.compiler }}" = "clang" ] && [ "${{ matrix.build_type }}" = "Debug" ]; then
+            CMAKE_FLAGS="$CMAKE_FLAGS \
+            -DCMAKE_C_FLAGS='--coverage -fprofile-instr-generate -fcoverage-mapping' \
+            -DCMAKE_CXX_FLAGS='--coverage -fprofile-instr-generate -fcoverage-mapping'"
+          fi
+
+          echo "Using CMake flags: $CMAKE_FLAGS"
+          cmake $CMAKE_FLAGS ..
+          make -j$(nproc)
         working-directory: /home/runner/work/pgexporter/pgexporter/
 
       - name: Run Tests
