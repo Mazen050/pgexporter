@@ -120,65 +120,6 @@ jobs:
           fi
         working-directory: /home/runner/work/pgexporter/pgexporter/
 
-      - name: Install lcov
-        if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lcov
-
-      - name: Generate coverage report (GCC - LCOV)
-        if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
-        run: |
-          mkdir -p /tmp/pgexporter-test/coverage/
-          
-          # DYNAMICALLY DETECT GCC VERSION
-          # This extracts the major version (e.g., "11", "12", "13") from the default gcc
-          GCC_VERSION=$(gcc -dumpversion | cut -f1 -d.)
-          echo "Detected default GCC version: $GCC_VERSION"
-          
-          # Construct the matching gcov command (e.g., "gcov-13")
-          GCOV_TOOL="gcov-$GCC_VERSION"
-          echo "Using gcov tool: $GCOV_TOOL"
-
-          # 1. Capture
-          lcov --capture \
-            --directory . \
-            --output-file coverage.info \
-            --gcov-tool "$GCOV_TOOL" \
-            --rc branch_coverage=1 \
-            --ignore-errors mismatch \
-            --ignore-errors inconsistent
-
-          # 2. Cleanup
-          lcov --remove coverage.info \
-            '/usr/*' \
-            '*/_deps/*' \
-            'test/*' \
-            --rc branch_coverage=1 \
-            --ignore-errors unused \
-            --output-file coverage.info
-          
-          # 3. List
-          lcov --list coverage.info \
-            --rc branch_coverage=1 \
-            > /tmp/pgexporter-test/coverage/coverage-report-gcc.txt
-          
-      - name: Report coverage summary
-        if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
-        run: |
-          echo "## Coverage Summary (GCC)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          
-          # Safely cat the file
-          if [ -f "/tmp/pgexporter-test/coverage/coverage-report-gcc.txt" ]; then
-            cat /tmp/pgexporter-test/coverage/coverage-report-gcc.txt >> $GITHUB_STEP_SUMMARY
-          else
-            echo "Error: Coverage report file not found." >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
       - name: Report coverage summary (GCOVR)
         if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
         run: |
@@ -189,11 +130,7 @@ jobs:
           echo "## Coverage Summary (GCC)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          
-          # Run gcovr for the text summary
-          # -r .             : Root directory
-          # --gcov-executable: Forces the matching version (Critical for believable numbers)
-          # --txt            : output format
+
           gcovr -r . --gcov-executable "$GCOV_TOOL" --txt >> $GITHUB_STEP_SUMMARY
           
           echo '```' >> $GITHUB_STEP_SUMMARY
