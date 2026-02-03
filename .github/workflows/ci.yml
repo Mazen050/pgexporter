@@ -126,17 +126,23 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lcov
       
-      - name: Generate coverage report (GCC - LCOV)
+      - name: GCC Coverage
         if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
         run: |
-          mkdir -p /tmp/pgexporter-test/coverage/
-          
-          # Capture and cleanup
-          lcov --capture --directory . --output-file coverage.info
-          lcov --remove coverage.info '/usr/*' 'test/*' --output-file coverage.info
-          
-          # Generate list
-          lcov --list coverage.info > /tmp/pgexporter-test/coverage/coverage-report-gcc.txt
+          lcov --capture \
+               --directory . \
+               --output-file coverage.info \
+               --gcov-tool $(which gcov) \
+               --ignore-errors inconsistent \
+               --rc branch_coverage=1
+
+          # FIX: Add --ignore-errors unused to prevent failure if a pattern isn't found
+          lcov --remove coverage.info \
+               '/usr/*' \
+               '*/_deps/*' \
+               'test/*' \
+               --ignore-errors unused \
+               --output-file coverage.info
           
       - name: Report coverage summary
         if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
