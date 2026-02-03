@@ -120,6 +120,15 @@ jobs:
           fi
         working-directory: /home/runner/work/pgexporter/pgexporter/
 
+      - name: Report coverage summary
+        if: matrix.compiler == 'clang' && matrix.build_type == 'Debug'
+        run: |
+          echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/pgmoneta-test/coverage/coverage-report-*.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
       # === Generate coverage reports ===
       - name: Generate Detailed HTML Coverage Report
         if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
