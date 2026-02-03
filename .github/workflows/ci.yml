@@ -119,14 +119,26 @@ jobs:
             $(which bash) ./test/check.sh ci
           fi
         working-directory: /home/runner/work/pgexporter/pgexporter/
-
+      
+      - name: Generate coverage report (GCC - LCOV)
+        if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
+        run: |
+          mkdir -p /tmp/pgexporter-test/coverage/
+          
+          # Capture and cleanup
+          lcov --capture --directory . --output-file coverage.info
+          lcov --remove coverage.info '/usr/*' 'test/*' --output-file coverage.info
+          
+          # Generate list
+          lcov --list coverage.info > /tmp/pgexporter-test/coverage/coverage-report-gcc.txt
+          
       - name: Report coverage summary
-        if: matrix.compiler == 'clang' && matrix.build_type == 'Debug'
+        if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
         run: |
           echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cat /tmp/pgmoneta-test/coverage/coverage-report-*.txt >> $GITHUB_STEP_SUMMARY
+          cat /tmp/pgexporter-test/coverage/coverage-report-*.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       # === Generate coverage reports ===
