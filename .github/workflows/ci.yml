@@ -179,6 +179,25 @@ jobs:
           
           echo '```' >> $GITHUB_STEP_SUMMARY
 
+      - name: Report coverage summary (GCOVR)
+        if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
+        run: |
+          # DYNAMICALLY DETECT GCC VERSION (Same logic as before)
+          GCC_VERSION=$(gcc -dumpversion | cut -f1 -d.)
+          GCOV_TOOL="gcov-$GCC_VERSION"
+          
+          echo "## Coverage Summary (GCC)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          
+          # Run gcovr for the text summary
+          # -r .             : Root directory
+          # --gcov-executable: Forces the matching version (Critical for believable numbers)
+          # --txt            : output format
+          gcovr -r . --gcov-executable "$GCOV_TOOL" --txt >> $GITHUB_STEP_SUMMARY
+          
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          
       # === Generate coverage reports ===
       - name: Generate Detailed HTML Coverage Report
         if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
