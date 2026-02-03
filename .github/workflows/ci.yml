@@ -76,7 +76,8 @@ jobs:
             texlive-latex-recommended texlive-fonts-recommended texlive-extra-utils \
             texlive-xetex texlive-fonts-extra wget graphviz doxygen \
             check curl \
-            gcovr
+            gcovr \
+            check curl llvm llvm-dev
 
       - name: Install PostgreSQL
         run: |
@@ -107,8 +108,15 @@ jobs:
                 export CC=/usr/bin/gcc
               else
                 export CC=/usr/bin/clang
+                export CXX=/usr/bin/clang++
               fi
-
+              
+              # Coverage flags for Clang + Debug
+              CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -Dcheck=ON"
+              if [ "${{ matrix.compiler }}" = "clang" ] && [ "${{ matrix.build_type }}" = "Debug" ]; then
+                 CMAKE_FLAGS="$CMAKE_FLAGS -DCMAKE_C_FLAGS='--coverage -fprofile-instr-generate -fcoverage-mapping'"
+              fi
+              
               cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -Dcheck=ON ..
               make -j$(nproc)
         working-directory: /home/runner/work/pgexporter/pgexporter/
@@ -120,21 +128,14 @@ jobs:
           fi
         working-directory: /home/runner/work/pgexporter/pgexporter/
 
-      - name: Report coverage summary (GCOVR)
-        if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
+      - name: Report coverage summary
+        if: matrix.compiler == 'clang' && matrix.build_type == 'Debug'
         run: |
-          # DYNAMICALLY DETECT GCC VERSION (Same logic as before)
-          GCC_VERSION=$(gcc -dumpversion | cut -f1 -d.)
-          GCOV_TOOL="gcov-$GCC_VERSION"
-          
-          echo "## Coverage Summary (GCC)" >> $GITHUB_STEP_SUMMARY
+          echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-
-          gcovr -r . --gcov-executable "$GCOV_TOOL" --txt >> $GITHUB_STEP_SUMMARY
-          
+          cat /tmp/pgexporter-test/coverage/coverage-report-*.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          
       # === Generate coverage reports ===
       - name: Generate Detailed HTML Coverage Report
         if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
