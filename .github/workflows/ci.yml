@@ -125,32 +125,46 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y lcov
-      
-      - name: GCC Coverage
+
+      - name: Generate coverage report (GCC - LCOV)
         if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
         run: |
+          mkdir -p /tmp/pgexporter-test/coverage/
+          
+          # 1. Capture Coverage
+          # We add --ignore-errors mismatch,inconsistent to handle minor gcov version differences
           lcov --capture \
-               --directory . \
-               --output-file coverage.info \
-               --gcov-tool $(which gcov) \
-               --ignore-errors inconsistent \
-               --rc branch_coverage=1
+            --directory . \
+            --output-file coverage.info \
+            --ignore-errors mismatch \
+            --ignore-errors inconsistent
 
-          # FIX: Add --ignore-errors unused to prevent failure if a pattern isn't found
+          # 2. Cleanup (Remove system files and tests)
+          # CRITICAL FIX: --ignore-errors unused prevents failure if 'test/*' is not found
           lcov --remove coverage.info \
-               '/usr/*' \
-               '*/_deps/*' \
-               'test/*' \
-               --ignore-errors unused \
-               --output-file coverage.info
+            '/usr/*' \
+            '*/_deps/*' \
+            'test/*' \
+            --ignore-errors unused \
+            --output-file coverage.info
+          
+          # 3. Generate List for Summary
+          lcov --list coverage.info > /tmp/pgexporter-test/coverage/coverage-report-gcc.txt
           
       - name: Report coverage summary
         if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
         run: |
-          echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Coverage Summary (GCC)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cat /tmp/pgexporter-test/coverage/coverage-report-*.txt >> $GITHUB_STEP_SUMMARY
+          
+          # Safely cat the file
+          if [ -f "/tmp/pgexporter-test/coverage/coverage-report-gcc.txt" ]; then
+            cat /tmp/pgexporter-test/coverage/coverage-report-gcc.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Error: Coverage report file not found." >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       # === Generate coverage reports ===
