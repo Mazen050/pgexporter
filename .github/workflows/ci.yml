@@ -131,25 +131,28 @@ jobs:
         run: |
           mkdir -p /tmp/pgexporter-test/coverage/
           
-          # 1. Capture Coverage
-          # We add --ignore-errors mismatch,inconsistent to handle minor gcov version differences
+          # 1. Capture (Enable Branch Coverage)
           lcov --capture \
             --directory . \
             --output-file coverage.info \
+            --rc branch_coverage=1 \
             --ignore-errors mismatch \
             --ignore-errors inconsistent
 
-          # 2. Cleanup (Remove system files and tests)
-          # CRITICAL FIX: --ignore-errors unused prevents failure if 'test/*' is not found
+          # 2. Cleanup (Enable Branch Coverage)
           lcov --remove coverage.info \
             '/usr/*' \
             '*/_deps/*' \
             'test/*' \
+            --rc branch_coverage=1 \
             --ignore-errors unused \
             --output-file coverage.info
           
-          # 3. Generate List for Summary
-          lcov --list coverage.info > /tmp/pgexporter-test/coverage/coverage-report-gcc.txt
+          # 3. List (Enable Branch Coverage for final table)
+          # Note: LCOV output is fixed to |Lines|Functions|Branches|
+          lcov --list coverage.info \
+            --rc branch_coverage=1 \
+            > /tmp/pgexporter-test/coverage/coverage-report-gcc.txt
           
       - name: Report coverage summary
         if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
