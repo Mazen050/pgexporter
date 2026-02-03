@@ -123,6 +123,9 @@ jobs:
 
       - name: Run Tests
         run: |
+          if [ "${{ matrix.compiler }}" = "clang" ] && [ "${{ matrix.build_type }}" = "Debug" ]; then
+             export LLVM_PROFILE_FILE="/tmp/pgexporter-test/coverage/code-%p.profraw"
+          fi
           if [ "${{ matrix.build_type }}" = "Debug" ]; then
             $(which bash) ./test/check.sh ci
           fi
