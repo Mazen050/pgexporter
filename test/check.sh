@@ -260,6 +260,7 @@ unset_pgexporter_test_variables() {
 }
 
 execute_testcases() {
+   export PATH="$EXECUTABLE_DIRECTORY:$PATH"
    echo "Execute Testcases"
    set +e
    echo "Starting pgexporter server in daemon mode"
