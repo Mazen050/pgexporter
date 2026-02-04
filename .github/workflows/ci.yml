@@ -122,16 +122,7 @@ jobs:
             export CXX=/usr/bin/clang++
           fi
 
-          CMAKE_FLAGS="-DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -Dcheck=ON"
-
-          if [ "${{ matrix.compiler }}" = "clang" ] && [ "${{ matrix.build_type }}" = "Debug" ]; then
-            CMAKE_FLAGS="$CMAKE_FLAGS \
-            -DCMAKE_C_FLAGS=--coverage\ -fprofile-instr-generate\ -fcoverage-mapping \
-            -DCMAKE_CXX_FLAGS=--coverage\ -fprofile-instr-generate\ -fcoverage-mapping"
-          fi
-
-          echo "Using CMake flags: $CMAKE_FLAGS"
-          cmake $CMAKE_FLAGS ..
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -Dcheck=ON ..
           make -j$(nproc)
         working-directory: /home/runner/work/pgexporter/pgexporter/
 
