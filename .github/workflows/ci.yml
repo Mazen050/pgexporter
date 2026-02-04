@@ -181,7 +181,15 @@ jobs:
           name: coverage-reports-${{ matrix.compiler }}-${{ matrix.build_type }}
           path: coverage-report
           retention-days: 90
-
+          
+      - name: Upload All Coverage Reports as Artifact
+        if: matrix.compiler == 'clang' && matrix.build_type == 'Debug'
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-reports-${{ matrix.compiler }}-${{ matrix.build_type }}
+          path: coverage-report
+          retention-days: 90
+          
       - name: Upload Build and Run Logs as Artifacts
         if: always()
         uses: actions/upload-artifact@v5
