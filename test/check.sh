@@ -90,43 +90,47 @@ cleanup() {
         rm -Rf "$BASE_DIR"
       fi
 
-      if ls "$COVERAGE_DIR"/*.profraw >/dev/null 2>&1; then
+      if ls "$COVERAGE_DIR"/*-*.profraw >/dev/null 2>&1; then
        echo "Generating coverage report, expect error when the binary is not covered at all"
-       llvm-profdata merge -sparse $COVERAGE_DIR/*.profraw -o $COVERAGE_DIR/coverage.profdata
+       llvm-profdata merge -sparse $COVERAGE_DIR/*-*.profraw -o $COVERAGE_DIR/coverage.profdata
 
        echo "Generating $COVERAGE_DIR/coverage-report-libpgexporter.txt"
-       llvm-cov report $EXECUTABLE_DIRECTORY/libpgexporter.so \
+       llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter/libpgexporter.so \
          --instr-profile=$COVERAGE_DIR/coverage.profdata \
          --format=text > $COVERAGE_DIR/coverage-report-libpgexporter.txt
        echo "Generating $COVERAGE_DIR/coverage-report-pgexporter.txt"
-       llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter \
+       llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter/pgexporter \
          --instr-profile=$COVERAGE_DIR/coverage.profdata \
          --format=text > $COVERAGE_DIR/coverage-report-pgexporter.txt
       echo "Generating $COVERAGE_DIR/coverage-report-pgexporter-cli.txt"
-      llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter-cli \
+      llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter/pgexporter-cli \
          --instr-profile=$COVERAGE_DIR/coverage.profdata \
          --format=text > $COVERAGE_DIR/coverage-report-pgexporter-cli.txt
       echo "Generating $COVERAGE_DIR/coverage-report-pgexporter-admin.txt"
-      llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter-admin \
+      llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter/pgexporter-admin \
          --instr-profile=$COVERAGE_DIR/coverage.profdata \
          --format=text > $COVERAGE_DIR/coverage-report-pgexporter-admin.txt
 
-       echo "Generating $COVERAGE_DIR/coverage-libpgexporter.txt"
-       llvm-cov show $EXECUTABLE_DIRECTORY/libpgexporter.so \
-         --instr-profile=$COVERAGE_DIR/coverage.profdata \
-         --format=text > $COVERAGE_DIR/coverage-libpgexporter.txt
-       echo "Generating $COVERAGE_DIR/coverage-pgexporter.txt"
-       llvm-cov show $EXECUTABLE_DIRECTORY/pgexporter \
-         --instr-profile=$COVERAGE_DIR/coverage.profdata \
-         --format=text > $COVERAGE_DIR/coverage-pgexporter.txt
+      echo "Generating $COVERAGE_DIR/coverage-libpgexporter.txt"
+      llvm-cov show $EXECUTABLE_DIRECTORY/pgexporter/libpgexporter.so \
+        --instr-profile=$COVERAGE_DIR/coverage.profdata \
+        --format=text > $COVERAGE_DIR/coverage-libpgexporter.txt
+      
+      echo "Generating $COVERAGE_DIR/coverage-pgexporter.txt"
+      llvm-cov show $EXECUTABLE_DIRECTORY/pgexporter/pgexporter \
+        --instr-profile=$COVERAGE_DIR/coverage.profdata \
+        --format=text > $COVERAGE_DIR/coverage-pgexporter.txt
+      
       echo "Generating $COVERAGE_DIR/coverage-pgexporter-cli.txt"
-      llvm-cov show $EXECUTABLE_DIRECTORY/pgexporter-cli \
-         --instr-profile=$COVERAGE_DIR/coverage.profdata \
-         --format=text > $COVERAGE_DIR/coverage-pgexporter-cli.txt
+      llvm-cov show $EXECUTABLE_DIRECTORY/pgexporter/pgexporter-cli \
+        --instr-profile=$COVERAGE_DIR/coverage.profdata \
+        --format=text > $COVERAGE_DIR/coverage-pgexporter-cli.txt
+      
       echo "Generating $COVERAGE_DIR/coverage-pgexporter-admin.txt"
-      llvm-cov show $EXECUTABLE_DIRECTORY/pgexporter-admin \
-         --instr-profile=$COVERAGE_DIR/coverage.profdata \
-         --format=text > $COVERAGE_DIR/coverage-pgexporter-admin.txt
+      llvm-cov show $EXECUTABLE_DIRECTORY/pgexporter/pgexporter-admin \
+        --instr-profile=$COVERAGE_DIR/coverage.profdata \
+        --format=text > $COVERAGE_DIR/coverage-pgexporter-admin.txt
+
        echo "Coverage --> $COVERAGE_DIR"
      fi
      echo "Logs --> $LOG_DIR, $PG_LOG_DIR"
