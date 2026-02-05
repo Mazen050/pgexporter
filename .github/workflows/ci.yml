@@ -187,7 +187,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: coverage-reports-${{ matrix.compiler }}-${{ matrix.build_type }}
-          path: coverage-report
+          path: /tmp/pgexporter-test/coverage
           retention-days: 90
           
       - name: Upload Build and Run Logs as Artifacts
