@@ -90,26 +90,50 @@ cleanup() {
         rm -Rf "$BASE_DIR"
       fi
 
+      # ... inside cleanup() function ...
+
       if ls "$COVERAGE_DIR"/*-*.profraw >/dev/null 2>&1; then
-       echo "Generating coverage report, expect error when the binary is not covered at all"
+       echo "Generating coverage report..."
        llvm-profdata merge -sparse $COVERAGE_DIR/*-*.profraw -o $COVERAGE_DIR/coverage.profdata
 
-       echo "Generating $COVERAGE_DIR/coverage-report-libpgexporter.txt"
-       llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter/libpgexporter.so \
+       # --- FIX STARTS HERE ---
+       
+       # 1. Detect the correct path (handle if binaries are in src/ or src/pgexporter/)
+       if [[ -f "$EXECUTABLE_DIRECTORY/libpgexporter.so" ]]; then
+           BIN_PATH="$EXECUTABLE_DIRECTORY"
+       elif [[ -f "$EXECUTABLE_DIRECTORY/pgexporter/libpgexporter.so" ]]; then
+           BIN_PATH="$EXECUTABLE_DIRECTORY/pgexporter"
+       else
+           echo "ERROR: Could not find libpgexporter.so in $EXECUTABLE_DIRECTORY or subdirectory."
+           ls -R "$EXECUTABLE_DIRECTORY" # Debug: list files to see where they are
+           exit 1
+       fi
+
+       # 2. Run reports with the detected path and capture STDERR to the file
+       echo "Generating reports using binaries in: $BIN_PATH"
+
+       echo "Generating libpgexporter report"
+       llvm-cov report "$BIN_PATH/libpgexporter.so" \
          --instr-profile=$COVERAGE_DIR/coverage.profdata \
-         --format=text > $COVERAGE_DIR/coverage-report-libpgexporter.txt
-       echo "Generating $COVERAGE_DIR/coverage-report-pgexporter.txt"
-       llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter/pgexporter \
+         --format=text > $COVERAGE_DIR/coverage-report-libpgexporter.txt 2>&1
+
+       echo "Generating pgexporter report"
+       llvm-cov report "$BIN_PATH/pgexporter" \
          --instr-profile=$COVERAGE_DIR/coverage.profdata \
-         --format=text > $COVERAGE_DIR/coverage-report-pgexporter.txt
-      echo "Generating $COVERAGE_DIR/coverage-report-pgexporter-cli.txt"
-      llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter/pgexporter-cli \
+         --format=text > $COVERAGE_DIR/coverage-report-pgexporter.txt 2>&1
+
+       # Repeat for cli and admin...
+       llvm-cov report "$BIN_PATH/pgexporter-cli" \
          --instr-profile=$COVERAGE_DIR/coverage.profdata \
-         --format=text > $COVERAGE_DIR/coverage-report-pgexporter-cli.txt
-      echo "Generating $COVERAGE_DIR/coverage-report-pgexporter-admin.txt"
-      llvm-cov report $EXECUTABLE_DIRECTORY/pgexporter/pgexporter-admin \
+         --format=text > $COVERAGE_DIR/coverage-report-pgexporter-cli.txt 2>&1
+
+       llvm-cov report "$BIN_PATH/pgexporter-admin" \
          --instr-profile=$COVERAGE_DIR/coverage.profdata \
-         --format=text > $COVERAGE_DIR/coverage-report-pgexporter-admin.txt
+         --format=text > $COVERAGE_DIR/coverage-report-pgexporter-admin.txt 2>&1
+
+       # --- FIX ENDS HERE ---
+       
+       # ... continue with llvm-cov show commands using $BIN_PATH ...
 
       echo "Generating $COVERAGE_DIR/coverage-libpgexporter.txt"
       llvm-cov show $EXECUTABLE_DIRECTORY/pgexporter/libpgexporter.so \
