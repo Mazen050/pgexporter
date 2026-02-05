@@ -33,7 +33,7 @@ IMAGE_NAME="pgexporter-test-postgresql17-rocky9"
 CONTAINER_NAME="pgexporter-test-postgresql17"
 
 SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-PROJECT_DIRECTORY=$(realpath "$SCRIPT_DIR/..")
+PROJECT_DIRECTORY=$(realpath "$SCRIPT_DIR/../..")
 EXECUTABLE_DIRECTORY=$PROJECT_DIRECTORY/build/src
 TEST_DIRECTORY=$PROJECT_DIRECTORY/build/test
 TEST_PG17_DIRECTORY=$PROJECT_DIRECTORY/test/postgresql/src/postgresql17
