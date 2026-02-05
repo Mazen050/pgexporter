@@ -122,7 +122,7 @@ jobs:
             export CXX=/usr/bin/clang++
           fi
 
-          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -Dcheck=ON ..
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DDOCS=FALSE -Dcheck=ON ..
           make -j$(nproc)
         working-directory: /home/runner/work/pgexporter/pgexporter/
 
