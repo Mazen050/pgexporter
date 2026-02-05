@@ -129,7 +129,7 @@ jobs:
       - name: Run Tests
         run: |
           if [ "${{ matrix.compiler }}" = "clang" ] && [ "${{ matrix.build_type }}" = "Debug" ]; then
-             export LLVM_PROFILE_FILE="/tmp/pgexporter-test/coverage/coverage-%p.profraw"
+             export LLVM_PROFILE_FILE="/tmp/pgexporter-test/coverage/code-%p.profraw"
           fi
           if [ "${{ matrix.build_type }}" = "Debug" ]; then
             $(which bash) ./test/check.sh ci
@@ -187,7 +187,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: coverage-reports-${{ matrix.compiler }}-${{ matrix.build_type }}
-          path: /tmp/pgexporter-test/coverage
+          path: coverage-report
           retention-days: 90
           
       - name: Upload Build and Run Logs as Artifacts
