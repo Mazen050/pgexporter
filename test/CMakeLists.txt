@@ -36,6 +36,20 @@ if (check)
 
   add_compile_options(-O0)
   add_compile_options(-DDEBUG)
+  # Enable LLVM coverage when using Clang
+  if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    message(STATUS "Enabling LLVM coverage instrumentation")
+  
+    add_compile_options(
+      -fprofile-instr-generate
+      -fcoverage-mapping
+    )
+  
+    add_link_options(
+      -fprofile-instr-generate
+      -fcoverage-mapping
+    )
+  endif()
 
   if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD")
