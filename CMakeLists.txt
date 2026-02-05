@@ -51,17 +51,22 @@ set(check TRUE)
 if (check AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
   message(STATUS "LLVM coverage enabled")
 
-  add_compile_options(
+  set(COVERAGE_FLAGS
     -fprofile-instr-generate
     -fcoverage-mapping
+    -O0
   )
-  add_compile_options(-O0)
 
+  add_compile_options(${COVERAGE_FLAGS})
   add_link_options(
     -fprofile-instr-generate
     -fcoverage-mapping
   )
+
+  # Make flags visible to all subdirectories
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COVERAGE_FLAGS}")
 endif()
+
 
 include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
