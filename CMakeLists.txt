@@ -39,6 +39,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 message(STATUS "pgexporter ${VERSION_STRING}")
 
+
+if (NOT DEFINED DOCS)
+  set(DOCS TRUE)
+endif()
+set(check TRUE)
+
 #
 # Enable LLVM coverage when running tests with Clang
 #
@@ -55,12 +61,6 @@ if (check AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
     -fcoverage-mapping
   )
 endif()
-
-
-if (NOT DEFINED DOCS)
-  set(DOCS TRUE)
-endif()
-set(check TRUE)
 
 include(CheckCCompilerFlag)
 include(CheckCSourceCompiles)
