@@ -326,8 +326,6 @@ run_tests() {
   cmake -DCMAKE_C_COMPILER=clang \
         -DCMAKE_BUILD_TYPE=Debug \
         -Dcheck=ON \
-        -DCMAKE_C_FLAGS="--coverage -fprofile-instr-generate -fcoverage-mapping" \
-        -DCMAKE_CXX_FLAGS="--coverage -fprofile-instr-generate -fcoverage-mapping" \
         ..
   make -j$(nproc)
   cd ..
