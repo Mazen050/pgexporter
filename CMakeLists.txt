@@ -55,6 +55,7 @@ if (check AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
     -fprofile-instr-generate
     -fcoverage-mapping
   )
+  add_compile_options(-O0)
 
   add_link_options(
     -fprofile-instr-generate
