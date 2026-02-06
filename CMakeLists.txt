@@ -45,6 +45,9 @@ if (NOT DEFINED DOCS)
 endif()
 set(check TRUE)
 
+#
+# Enable LLVM coverage when running tests with Clang
+#
 if (check AND CMAKE_C_COMPILER_ID STREQUAL "Clang")
   message(STATUS "LLVM coverage enabled")
 
