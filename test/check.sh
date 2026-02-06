@@ -346,7 +346,7 @@ run_tests() {
       exit 1
     fi
   fi
-  
+
   if [[ ! -f "$EXECUTABLE_DIRECTORY/pgexporter" ]] || [[ ! -f "$TEST_DIRECTORY/pgexporter-test" ]]; then
     echo "Building pgexporter"
     mkdir -p "$PROJECT_DIRECTORY/build"
@@ -358,7 +358,6 @@ run_tests() {
   else
     echo "pgexporter already built, skipping build step"
   fi
-
 
   echo "Start PostgreSQL 17 container"
   start_postgresql_container
