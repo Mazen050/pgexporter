@@ -346,17 +346,18 @@ run_tests() {
       exit 1
     fi
   fi
-
-  echo "Building pgexporter"
-  mkdir -p "$PROJECT_DIRECTORY/build"
-  cd "$PROJECT_DIRECTORY/build"
-  export CC=$(which clang)
-  cmake -DCMAKE_C_COMPILER=clang \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -Dcheck=ON \
-        ..
-  make -j$(nproc)
-  cd ..
+  
+  if [[ ! -f "$EXECUTABLE_DIRECTORY/pgexporter" ]] || [[ ! -f "$TEST_DIRECTORY/pgexporter-test" ]]; then
+    echo "Building pgexporter"
+    mkdir -p "$PROJECT_DIRECTORY/build"
+    cd "$PROJECT_DIRECTORY/build"
+    export CC=$(which clang)
+    cmake -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug -Dcheck=ON ..
+    make -j$(nproc)
+    cd ..
+  else
+    echo "pgexporter already built, skipping build step"
+  fi
 
 
   echo "Start PostgreSQL 17 container"
