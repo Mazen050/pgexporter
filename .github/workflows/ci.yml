@@ -76,7 +76,8 @@ jobs:
             texlive-latex-recommended texlive-fonts-recommended texlive-extra-utils \
             texlive-xetex texlive-fonts-extra wget graphviz doxygen \
             check curl \
-            gcovr \
+            gcovr
+
       - name: Install LLVM/Clang Toolchain
         run: |
           sudo apt update -y
@@ -90,7 +91,6 @@ jobs:
           sudo ln -sf /usr/bin/clang-21 /usr/bin/clang
           sudo ln -sf /usr/bin/clang++-21 /usr/bin/clang++
           
-          # === ADD THESE LINES ===
           # Create symlinks for coverage tools
           sudo ln -sf /usr/bin/llvm-cov-21 /usr/bin/llvm-cov
           sudo ln -sf /usr/bin/llvm-profdata-21 /usr/bin/llvm-profdata
@@ -117,19 +117,17 @@ jobs:
 
       - name: Build Project
         run: |
-          mkdir build
-          cd build
-
-          if [ "${{ matrix.compiler }}" = "gcc" ]; then
-            export CC=/usr/bin/gcc
-            export CXX=/usr/bin/g++
-          else
-            export CC=/usr/bin/clang
-            export CXX=/usr/bin/clang++
-          fi
-
-          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DDOCS=FALSE -Dcheck=ON ..
-          make -j$(nproc)
+              mkdir build
+              cd build
+    
+              if [ "${{ matrix.compiler }}" = "gcc" ]; then
+                export CC=/usr/bin/gcc
+              else
+                export CC=/usr/bin/clang
+              fi
+    
+              cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -Dcheck=ON ..
+              make -j$(nproc)
         working-directory: /home/runner/work/pgexporter/pgexporter/
 
       - name: Run Tests
