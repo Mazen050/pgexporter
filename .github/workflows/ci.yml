@@ -85,9 +85,15 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main" | sudo tee /etc/apt/sources.list.d/llvm.list
           sudo apt update -y
           sudo apt install -y clang-21 clang-tools-21 llvm-21
+          
+          # Create symlinks for the compiler
           sudo ln -sf /usr/bin/clang-21 /usr/bin/clang
           sudo ln -sf /usr/bin/clang++-21 /usr/bin/clang++
-
+          
+          # === ADD THESE LINES ===
+          # Create symlinks for coverage tools
+          sudo ln -sf /usr/bin/llvm-cov-21 /usr/bin/llvm-cov
+          sudo ln -sf /usr/bin/llvm-profdata-21 /usr/bin/llvm-profdata
       - name: Install PostgreSQL
         run: |
           sudo apt install curl ca-certificates
