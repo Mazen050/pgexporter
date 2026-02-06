@@ -119,13 +119,12 @@ jobs:
         run: |
               mkdir build
               cd build
-    
               if [ "${{ matrix.compiler }}" = "gcc" ]; then
                 export CC=/usr/bin/gcc
               else
                 export CC=/usr/bin/clang
               fi
-    
+
               cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -Dcheck=ON ..
               make -j$(nproc)
         working-directory: /home/runner/work/pgexporter/pgexporter/
@@ -148,6 +147,7 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           cat /tmp/pgexporter-test/coverage/coverage-report-*.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+
       # === Generate coverage reports ===
       - name: Generate Detailed HTML Coverage Report
         if: matrix.compiler == 'gcc' && matrix.build_type == 'Debug'
