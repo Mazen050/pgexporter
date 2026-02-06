@@ -39,7 +39,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 message(STATUS "pgexporter ${VERSION_STRING}")
 
-
 if (NOT DEFINED DOCS)
   set(DOCS TRUE)
 endif()
